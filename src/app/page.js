@@ -39,6 +39,7 @@ const page = () => {
   };
 
   const fetchInsights = async () => {
+    console.log(selectedPage,"and", accessToken)
     if (!selectedPage) return;
     const { accessToken } = user;
     try {
@@ -134,7 +135,7 @@ const page = () => {
             />
           </div>
         ) : (
-          // Rest of your component remains the same
+  
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
