@@ -32,7 +32,7 @@ const page = () => {
       const pagesRes = await axios.get(
         `https://fb-assignment.onrender.com/pages?access_token=${response.accessToken}`
       );
-      setPages(pagesRes.data.data);
+      setPages(pagesRes.data);
     } catch (error) {
       setError(error.message);
       console.error("Error fetching data:", error);
