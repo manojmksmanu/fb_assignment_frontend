@@ -51,7 +51,7 @@ const page = () => {
         {
           params: {
             page_id: selectedPage,
-            access_token: access_token,
+            access_token: access_token.access_token,
           },
         }
       );
