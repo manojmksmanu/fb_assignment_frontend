@@ -1,4 +1,5 @@
 // components/PageSelect.js
+"use client"
 import React from "react";
 
 const PageSelect = ({ pages, setSelectedPage }) => {

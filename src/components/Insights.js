@@ -1,4 +1,5 @@
 // components/Insights.js
+"use client"
 import React from "react";
 import { BarChart, Users, Eye, ThumbsUp } from "lucide-react";
 

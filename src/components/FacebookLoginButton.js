@@ -1,4 +1,5 @@
 // components/FacebookLoginButton.js
+"use client"
 import React from "react";
 import FacebookLogin from "@greatsumini/react-facebook-login";
 

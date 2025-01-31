@@ -1,4 +1,5 @@
 // components/ErrorMessage.js
+"use client"
 import React from "react";
 
 const ErrorMessage = ({ message }) => {
