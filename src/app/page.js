@@ -288,7 +288,7 @@
 import React, { useState } from "react";
 import FacebookLogin from "@greatsumini/react-facebook-login";
 import axios from "axios";
-import { Layout, BarChart, Users, Eye, ThumbsUp, Calendar } from "lucide-react";
+import { Layout, BarChart, Users, Eye, ThumbsUp, Calendar, ChevronDown, ChevronUp } from "lucide-react";
 
 const Page = () => {
   const [user, setUser] = useState(null);
@@ -297,6 +297,7 @@ const Page = () => {
   const [insights, setInsights] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showDateFilter, setShowDateFilter] = useState(false);
   const [dateRange, setDateRange] = useState({
     since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     until: new Date().toISOString().split('T')[0]
@@ -311,7 +312,7 @@ const Page = () => {
     setLoading(true);
     try {
       const userResponse = await axios.get(
-         `https://graph.facebook.com/me?fields=id,name,picture&access_token=${response.accessToken}`
+        `https://graph.facebook.com/me?fields=id,name,picture&access_token=${response.accessToken}`
       );
       setUser({
         ...userResponse.data,
@@ -319,18 +320,17 @@ const Page = () => {
       });
 
       const pagesRes = await axios.get(
-        `https://fb-assignment.onrender.com/pages?access_token=${response.accessToken}`
+       ` https://fb-assignment.onrender.com/pages?access_token=${response.accessToken}`
       );
       setPages(pagesRes.data.data);
     } catch (error) {
       setError(error.message);
-      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchInsights = async () => {
+  const fetchInsights = async (customDateRange = null) => {
     if (!selectedPage) return;
 
     const pageData = pages.find((item) => item.id === selectedPage);
@@ -343,20 +343,23 @@ const Page = () => {
     setError(null);
 
     try {
-      const sinceTimestamp = Math.floor(new Date(dateRange.since).getTime() / 1000);
-      const untilTimestamp = Math.floor(new Date(dateRange.until).getTime() / 1000);
+      let params = {
+        page_id: selectedPage,
+        access_token: pageData.access_token,
+      };
+
+      if (customDateRange) {
+        params = {
+          ...params,
+          since: Math.floor(new Date(customDateRange.since).getTime() / 1000),
+          until: Math.floor(new Date(customDateRange.until).getTime() / 1000),
+          period: "total_over_range"
+        };
+      }
 
       const insightsRes = await axios.get(
         "https://fb-assignment.onrender.com/page-insights",
-        {
-          params: {
-            page_id: selectedPage,
-            access_token: pageData.access_token,
-            // since: sinceTimestamp,
-            // until: untilTimestamp,
-            // period: "total_over_range"
-          },
-        }
+        { params }
       );
 
       if (insightsRes.data.error) {
@@ -365,24 +368,30 @@ const Page = () => {
       }
 
       setInsights(insightsRes.data.data || []);
+      if (!customDateRange) {
+        setShowDateFilter(true);
+      }
     } catch (error) {
-      const errorMessage = error.response?.data?.error || error.message;
-      setError(errorMessage);
+      setError(error.response?.data?.error || error.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const applyDateFilter = () => {
+    fetchInsights(dateRange);
   };
 
   const getMetricIcon = (metricName) => {
     switch (metricName) {
       case "page_fans":
         return <Users className="w-6 h-6 text-blue-500" />;
+      case "page_engaged_users":
+        return <BarChart className="w-6 h-6 text-orange-500" />;
       case "page_impressions":
         return <Eye className="w-6 h-6 text-green-500" />;
       case "page_reactions_total":
         return <ThumbsUp className="w-6 h-6 text-purple-500" />;
-      case "page_engaged_users":
-        return <BarChart className="w-6 h-6 text-orange-500" />;
       default:
         return <BarChart className="w-6 h-6 text-gray-500" />;
     }
@@ -473,10 +482,14 @@ const Page = () => {
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex flex-col space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+                <div className="flex items-center justify-between">
                   <select
                     className="block w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    onChange={(e) => setSelectedPage(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedPage(e.target.value);
+                      setShowDateFilter(false);
+                      setInsights(null);
+                    }}
                     value={selectedPage}
                     disabled={loading}
                   >
@@ -488,115 +501,131 @@ const Page = () => {
                     ))}
                   </select>
 
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-5 h-5 text-gray-400" />
-                      <input
-                        type="date"
-                        value={dateRange.since}
-                        onChange={(e) => setDateRange(prev => ({ ...prev, since: e.target.value }))}
-                        className="border border-gray-300 rounded-md p-2"
-                        disabled={loading}
-                      />
-                    </div>
-                    <span>to</span>
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-5 h-5 text-gray-400" />
-                      <input
-                        type="date"
-                        value={dateRange.until}
-                        onChange={(e) => setDateRange(prev => ({ ...prev, until: e.target.value }))}
-                        className="border border-gray-300 rounded-md p-2"
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
+                  <button
+                    onClick={() => fetchInsights()}
+                    disabled={!selectedPage || loading}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <BarChart className="w-4 h-4 mr-2" />
+                        Get Insights
+                      </>
+                    )}
+                  </button>
                 </div>
 
-                <button
-                  onClick={fetchInsights}
-                  disabled={!selectedPage || loading}
-                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Loading...
-                    </>
-                  ) : (
-                    <>
-                      <BarChart className="w-4 h-4 mr-2" />
-                      Get Insights
-                    </>
-                  )}
-                </button>
+                {showDateFilter && insights && (
+                  <div className="mt-4 border-t pt-4">
+                    <button
+                      onClick={() => setShowDateFilter(!showDateFilter)}
+                      className="flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
+                    >
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Custom Date Range
+                      {showDateFilter ? (
+                        <ChevronUp className="w-4 h-4 ml-1" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 ml-1" />
+                      )}
+                    </button>
+                    
+                    <div className="flex flex-wrap gap-4 items-end">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Start Date
+                        </label>
+                        <input
+                          type="date"
+                          value={dateRange.since}
+                          onChange={(e) => setDateRange(prev => ({ ...prev, since: e.target.value }))}
+                          className="border border-gray-300 rounded-md p-2"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          End Date
+                        </label>
+                        <input
+                          type="date"
+                          value={dateRange.until}
+                          onChange={(e) => setDateRange(prev => ({ ...prev, until: e.target.value }))}
+                          className="border border-gray-300 rounded-md p-2"
+                        />
+                      </div>
+                      <button
+                        onClick={applyDateFilter}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        Apply Filter
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             {loading ? (
-              <div className="bg-white rounded-lg shadow-sm p-6 flex justify-center items-center">
-                <div className="animate-pulse flex space-x-4">
-                  <div className="rounded-full bg-slate-200 h-10 w-10"></div>
-                  <div className="flex-1 space-y-6 py-1">
-                    <div className="h-2 bg-slate-200 rounded"></div>
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="h-2 bg-slate-200 rounded col-span-2"></div>
-                        <div className="h-2 bg-slate-200 rounded col-span-1"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : insights && insights.length > 0 ? (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">
-                  Page Insights
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {insights.map((metric, index) => (
-                    <div
-                      key={metric.name || index}
-                      className="bg-gray-50 rounded-lg p-6 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-start justify-between">
-                        {getMetricIcon(metric.name)}
-                        <div className="ml-4 flex-1">
-                          <p className="text-sm font-medium text-gray-600">
-                            {getMetricName(metric.name)}
-</p>
-                          <p className="mt-2 text-2xl font-semibold text-gray-900">
-                            {metric.values && metric.values[0]
-                              ? parseInt(metric.values[0].value).toLocaleString()
-                              : "0"}
-                          </p>
-                          <p className="mt-1 text-xs text-gray-500">
-                            {new Date(dateRange.since).toLocaleDateString()} - {new Date(dateRange.until).toLocaleDateString()}
-                          </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="animate-pulse flex space-x-4">
+                      <div className="rounded-full bg-slate-200 h-10 w-10"></div>
+                      <div className="flex-1 space-y-6">
+                        <div className="h-2 bg-slate-200 rounded"></div>
+                        <div className="space-y-3">
+                          <div className="h-2 bg-slate-200 rounded"></div>
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-
-                {/* Additional Insights Summary */}
-                <div className="mt-8 border-t pt-6">
-                  <h4 className="text-sm font-medium text-gray-500 mb-4">
-                    Summary for Selected Period
-                  </h4>
-                  <div className="text-sm text-gray-600">
-                    <p>Data shown for: {pages.find(p => p.id === selectedPage)?.name}</p>
-                    <p>Period: {new Date(dateRange.since).toLocaleDateString()} to {new Date(dateRange.until).toLocaleDateString()}</p>
                   </div>
-                </div>
+                ))}
+              </div>
+            ) : insights && insights.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {insights.map((metric, index) => (
+                  <div
+                    key={metric.name || index}
+                    className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start space-x-4">
+                      {getMetricIcon(metric.name)}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600">
+                          {getMetricName(metric.name)}
+                        </p>
+                        <p className="mt-2 text-2xl font-semibold text-gray-900">
+                          {metric.values && metric.values[0]
+                            ? parseInt(metric.values[0].value).toLocaleString()
+                            : "0"}
+                        </p>
+                        {metric.values && metric.values[0]?.end_time && (
+                          <p className="mt-1 text-xs text-gray-500">
+                            Last updated: {new Date(metric.values[0].end_time).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : selectedPage ? (
               <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-                <p className="text-gray-500">No insights data available for the selected period</p>
-                <p className="text-sm text-gray-400 mt-2">Try adjusting the date range or selecting a different page</p>
+                <p className="text-gray-500">Select a page and click "Get Insights" to
+view the analytics data</p>
+                {error && (
+                  <p className="text-sm text-red-500 mt-2">
+                    Error: {error}
+                  </p>
+                )}
               </div>
             ) : null}
           </div>
