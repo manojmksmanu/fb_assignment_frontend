@@ -634,7 +634,7 @@ const Page = () => {
               </div>
             ) : insights && insights.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {insights.map((metric, index) => (
+                {insights.data.map((metric, index) => (
                   <div
                     key={metric.name || index}
                     className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
