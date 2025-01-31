@@ -73,13 +73,18 @@ const Page = () => {
         access_token: pageData.access_token,
       };
 
+      // Check if custom date range is provided
       if (customDateRange) {
-        params = {
-          ...params,
-          since: Math.floor(new Date(customDateRange.since).getTime() / 1000),
-          until: Math.floor(new Date(customDateRange.until).getTime() / 1000),
-          period: "total_over_range",
-        };
+        params.since = Math.floor(
+          new Date(customDateRange.since).getTime() / 1000
+        );
+        params.until = Math.floor(
+          new Date(customDateRange.until).getTime() / 1000
+        );
+        params.period = "total_over_range"; // Use this for custom ranges
+      } else {
+        // Default to lifetime insights if no custom date range
+        params.period = "lifetime"; // Set period to lifetime
       }
 
       const insightsRes = await axios.get(
@@ -92,11 +97,11 @@ const Page = () => {
         return;
       }
 
-      console.log(insightsRes.data.data, "insite data");
+      console.log(insightsRes.data.data, "insight data");
 
       setInsights(insightsRes.data.data || []);
       if (!customDateRange) {
-        setShowDateFilter(true);
+        setShowDateFilter(true); // Show date filter option only if lifetime data is fetched
       }
     } catch (error) {
       setError(error.response?.data?.error || error.message);
