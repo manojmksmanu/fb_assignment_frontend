@@ -625,7 +625,7 @@ const Page = () => {
               </div>
             </div>
 
-            {loading ? (
+            {/* {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="bg-white rounded-lg shadow-sm p-6">
@@ -682,7 +682,7 @@ const Page = () => {
                   <p className="text-sm text-red-500 mt-2">Error: {error}</p>
                 )}
               </div>
-            ) : null}
+            ) : null} */}
 
             {insights && insights.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
