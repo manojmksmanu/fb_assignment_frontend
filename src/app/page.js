@@ -340,6 +340,8 @@ const Page = () => {
     }
   };
 
+  console.log(pages,'pages')
+
   const applyDateFilter = () => {
     fetchInsights(dateRange);
   };
