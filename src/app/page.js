@@ -248,7 +248,16 @@
 import React, { useState } from "react";
 import FacebookLogin from "@greatsumini/react-facebook-login";
 import axios from "axios";
-import { Layout, BarChart, Users, Eye, ThumbsUp, Calendar, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Layout,
+  BarChart,
+  Users,
+  Eye,
+  ThumbsUp,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 
 const Page = () => {
   const [user, setUser] = useState(null);
@@ -315,7 +324,7 @@ const Page = () => {
           ...params,
           since: Math.floor(new Date(customDateRange.since).getTime() / 1000),
           until: Math.floor(new Date(customDateRange.until).getTime() / 1000),
-          period: "total_over_range"
+          period: "total_over_range",
         };
       }
 
@@ -329,9 +338,9 @@ const Page = () => {
         return;
       }
 
-      console.log(insightsRes.data,'insite data')
+      console.log(insightsRes.data.data, "insite data");
 
-      setInsights(insightsRes.data || []);
+      setInsights(insightsRes.data.data || []);
       if (!customDateRange) {
         setShowDateFilter(true);
       }
@@ -342,9 +351,9 @@ const Page = () => {
     }
   };
 
-  console.log(pages,'pages')
+  console.log(pages, "pages");
 
-  console.log(insights,'insites')
+  console.log(insights, "insites");
 
   const applyDateFilter = () => {
     fetchInsights(dateRange);
@@ -674,6 +683,49 @@ const Page = () => {
                 )}
               </div>
             ) : null}
+
+            {insights && insights.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {insights.map((metric, index) => (
+                  <div
+                    key={metric.name || index}
+                    className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start space-x-4">
+                      {getMetricIcon(metric.name)}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600">
+                          {getMetricName(metric.name)}
+                        </p>
+                        <p className="mt-2 text-2xl font-semibold text-gray-900">
+                          {metric.values && metric.values[0]
+                            ? parseInt(metric.values[0].value).toLocaleString()
+                            : "0"}
+                        </p>
+                        {metric.values && metric.values[0]?.end_time && (
+                          <p className="mt-1 text-xs text-gray-500">
+                            Last updated:{" "}
+                            {new Date(
+                              metric.values[0].end_time
+                            ).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+                <p className="text-gray-500">
+                  Select a page and click "Get Insights" to view the analytics
+                  data
+                </p>
+                {error && (
+                  <p className="text-sm text-red-500 mt-2">Error: {error}</p>
+                )}
+              </div>
+            )}
           </div>
         )}
       </main>
