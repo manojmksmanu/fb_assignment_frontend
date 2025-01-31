@@ -352,9 +352,9 @@ const Page = () => {
           params: {
             page_id: selectedPage,
             access_token: pageData.access_token,
-            since: sinceTimestamp,
-            until: untilTimestamp,
-            period: "total_over_range"
+            // since: sinceTimestamp,
+            // until: untilTimestamp,
+            // period: "total_over_range"
           },
         }
       );
