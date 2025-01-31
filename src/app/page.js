@@ -32,61 +32,61 @@ const page = () => {
       const pagesRes = await axios.get(
         `https://fb-assignment.onrender.com/pages?access_token=${response.accessToken}`
       );
-      setPages(pagesRes.data);
+      setPages(pagesRes.data.data);
     } catch (error) {
       setError(error.message);
       console.error("Error fetching data:", error);
     }
   };
 
-const fetchInsights = async () => {
-  if (!selectedPage) return;
+  const fetchInsights = async () => {
+    if (!selectedPage) return;
 
-  const pageData = pages.find((item) => item.id === selectedPage);
+    const pageData = pages.find((item) => item.id === selectedPage);
 
-  if (!pageData || !pageData.access_token) {
-    console.error("No page data or access token found for selected page");
-    return;
-  }
-
-  console.log("Fetching insights for page:", {
-    pageId: selectedPage,
-    tokenLength: pageData.access_token.length,
-  });
-
-  try {
-    const insightsRes = await axios.get(
-      `https://fb-assignment.onrender.com/page-insights`,
-      {
-        params: {
-          page_id: selectedPage,
-          access_token: pageData.access_token,
-        },
-      }
-    );
-
-    console.log("Insights response structure:", {
-      status: insightsRes.status,
-      hasData: !!insightsRes.data,
-      dataKeys: Object.keys(insightsRes.data || {}),
-    });
-
-    if (insightsRes.data.error) {
-      setError(insightsRes.data.error);
+    if (!pageData || !pageData.access_token) {
+      console.error("No page data or access token found for selected page");
       return;
     }
 
-    setInsights(insightsRes.data.data);
-  } catch (error) {
-    const errorMessage = error.response?.data?.error || error.message;
-    setError(errorMessage);
-    console.error("Detailed error:", {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
+    console.log("Fetching insights for page:", {
+      pageId: selectedPage,
+      tokenLength: pageData.access_token.length,
     });
-  }
-};
+
+    try {
+      const insightsRes = await axios.get(
+        `https://fb-assignment.onrender.com/page-insights`,
+        {
+          params: {
+            page_id: selectedPage,
+            access_token: pageData.access_token,
+          },
+        }
+      );
+
+      console.log("Insights response structure:", {
+        status: insightsRes.status,
+        hasData: !!insightsRes.data,
+        dataKeys: Object.keys(insightsRes.data || {}),
+      });
+
+      if (insightsRes.data.error) {
+        setError(insightsRes.data.error);
+        return;
+      }
+      console.log(insightsRes.data);
+      setInsights(insightsRes.data);
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.message;
+      setError(errorMessage);
+      console.error("Detailed error:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+    }
+  };
   const getMetricIcon = (metricName) => {
     if (metricName.includes("fan"))
       return <Users className="w-6 h-6 text-blue-500" />;
