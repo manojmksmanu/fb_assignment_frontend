@@ -9,7 +9,7 @@ const page = () => {
   const [user, setUser] = useState(null);
   const [pages, setPages] = useState([]);
   const [selectedPage, setSelectedPage] = useState("");
-  const [insights, setInsights] = useState(null);
+const [insights, setInsights] = useState(null);
   const [error, setError] = useState(null);
 
   const responseFacebook = async (response) => {
@@ -38,55 +38,93 @@ const page = () => {
       console.error("Error fetching data:", error);
     }
   };
+const fetchInsights = async () => {
+  if (!selectedPage) return;
 
-  const fetchInsights = async () => {
-    if (!selectedPage) return;
+  const pageData = pages.find((item) => item.id === selectedPage);
 
-    const pageData = pages.find((item) => item.id === selectedPage);
+  if (!pageData || !pageData.access_token) {
+    console.error("No page data or access token found for selected page");
+    return;
+  }
 
-    if (!pageData || !pageData.access_token) {
-      console.error("No page data or access token found for selected page");
+  try {
+    const insightsRes = await axios.get(
+      `https://fb-assignment.onrender.com/page-insights`,
+      {
+        params: {
+          page_id: selectedPage,
+          access_token: pageData.access_token,
+        },
+      }
+    );
+
+    console.log("Raw insights response:", insightsRes.data);
+
+    if (insightsRes.data.error) {
+      setError(insightsRes.data.error);
       return;
     }
 
-    console.log("Fetching insights for page:", {
-      pageId: selectedPage,
-      tokenLength: pageData.access_token.length,
+    // Make sure we're setting an array of metrics
+    setInsights(insightsRes.data.data || []);
+  } catch (error) {
+    const errorMessage = error.response?.data?.error || error.message;
+    setError(errorMessage);
+    console.error("Detailed error:", {
+      message: error.message,
+      response: error.response?.data,
     });
+  }
+};
+  // const fetchInsights = async () => {
+  //   if (!selectedPage) return;
 
-    try {
-      const insightsRes = await axios.get(
-        `https://fb-assignment.onrender.com/page-insights`,
-        {
-          params: {
-            page_id: selectedPage,
-            access_token: pageData.access_token,
-          },
-        }
-      );
+  //   const pageData = pages.find((item) => item.id === selectedPage);
 
-      console.log("Insights response structure:", {
-        status: insightsRes.status,
-        hasData: !!insightsRes.data,
-        dataKeys: Object.keys(insightsRes.data || {}),
-      });
+  //   if (!pageData || !pageData.access_token) {
+  //     console.error("No page data or access token found for selected page");
+  //     return;
+  //   }
 
-      if (insightsRes.data.error) {
-        setError(insightsRes.data.error);
-        return;
-      }
-      console.log(insightsRes.data);
-      setInsights(insightsRes.data);
-    } catch (error) {
-      const errorMessage = error.response?.data?.error || error.message;
-      setError(errorMessage);
-      console.error("Detailed error:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-    }
-  };
+  //   console.log("Fetching insights for page:", {
+  //     pageId: selectedPage,
+  //     tokenLength: pageData.access_token.length,
+  //   });
+
+  //   try {
+  //     const insightsRes = await axios.get(
+  //       `https://fb-assignment.onrender.com/page-insights`,
+  //       {
+  //         params: {
+  //           page_id: selectedPage,
+  //           access_token: pageData.access_token,
+  //         },
+  //       }
+  //     );
+
+  //     console.log("Insights response structure:", {
+  //       status: insightsRes.status,
+  //       hasData: !!insightsRes.data,
+  //       dataKeys: Object.keys(insightsRes.data || {}),
+  //     });
+
+  //     if (insightsRes.data.error) {
+  //       setError(insightsRes.data.error);
+  //       return;
+  //     }
+  //     console.log(insightsRes.data);
+  //     setInsights(insightsRes.data);
+  //   } catch (error) {
+  //     const errorMessage = error.response?.data?.error || error.message;
+  //     setError(errorMessage);
+  //     console.error("Detailed error:", {
+  //       message: error.message,
+  //       response: error.response?.data,
+  //       status: error.response?.status,
+  //     });
+  //   }
+  // };
   const getMetricIcon = (metricName) => {
     if (metricName.includes("fan"))
       return <Users className="w-6 h-6 text-blue-500" />;
@@ -197,15 +235,15 @@ const page = () => {
               </div>
             </div>
 
-            {insights && (
+            {insights && insights.length > 0 ? (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-6">
                   Page Insights
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {insights.map((metric) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {insights.map((metric, index) => (
                     <div
-                      key={metric.id}
+                      key={metric.name || index}
                       className="bg-gray-50 rounded-lg p-6 hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-start justify-between">
@@ -221,13 +259,21 @@ const page = () => {
                               .join(" ")}
                           </p>
                           <p className="mt-2 text-2xl font-semibold text-gray-900">
-                            {parseInt(metric.values[0].value).toLocaleString()}
+                            {metric.values && metric.values[0]
+                              ? parseInt(
+                                  metric.values[0].value
+                                ).toLocaleString()
+                              : "0"}
                           </p>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+                <p className="text-gray-500">No insights data available</p>
               </div>
             )}
           </div>
