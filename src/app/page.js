@@ -44,7 +44,7 @@ const page = () => {
 
     const access_token = pages.find((item) => item.id === selectedPage);
 
-    console.log(access_token, "page token");
+    console.log(access_token.access_token, "page token");
     try {
       const insightsRes = await axios.get(
         `https://fb-assignment.onrender.com/page-insights`,
