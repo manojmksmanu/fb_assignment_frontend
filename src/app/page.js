@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import FacebookLogin from "@greatsumini/react-facebook-login";
 import axios from "axios";
 import { Layout, BarChart, Users, Eye, ThumbsUp } from "lucide-react";
+import { PAGES_DIR_ALIAS } from "next/dist/lib/constants";
 
 const page = () => {
   const [user, setUser] = useState(null);
@@ -41,14 +42,18 @@ const page = () => {
   const fetchInsights = async () => {
     if (!selectedPage) return;
     const { accessToken } = user;
-    console.log(selectedPage,"and", accessToken)
+
+
+    const access_token = pages.find(item => item.id === selectedPage);
+
+
     try {
       const insightsRes = await axios.get(
         `https://fb-assignment.onrender.com/page-insights`,
         {
           params: {
             page_id: selectedPage,
-            access_token: accessToken,
+            access_token: access_token,
           },
         }
       );
@@ -69,6 +74,8 @@ const page = () => {
       return <ThumbsUp className="w-6 h-6 text-purple-500" />;
     return <BarChart className="w-6 h-6 text-orange-500" />;
   };
+
+  console.log(pages);
 
   return (
     <div className="min-h-screen bg-gray-50">
