@@ -44,8 +44,15 @@ const page = () => {
     console.log(selectedPage,"and", accessToken)
     try {
       const insightsRes = await axios.get(
-        `https://fb-assignment.onrender.com/page-insights?page_id=${selectedPage}&access_token=${accessToken}`
+        `https://fb-assignment.onrender.com/page-insights`,
+        {
+          params: {
+            page_id: selectedPage,
+            access_token: accessToken,
+          },
+        }
       );
+      console.log(insightsRes.data);
       setInsights(insightsRes.data.data);
     } catch (error) {
       setError(error.message);
