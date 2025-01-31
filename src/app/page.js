@@ -236,7 +236,7 @@ const Page = () => {
           </div>
         )}
 
-        {user ? (
+        {!user ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] bg-white rounded-lg shadow-sm p-8">
             <h1 className="text-2xl font-bold text-gray-900 mb-8">
               Welcome to FB Insights Dashboard
