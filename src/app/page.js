@@ -299,8 +299,10 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const [showDateFilter, setShowDateFilter] = useState(false);
   const [dateRange, setDateRange] = useState({
-    since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    until: new Date().toISOString().split('T')[0]
+    since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
+    until: new Date().toISOString().split("T")[0],
   });
 
   const responseFacebook = async (response) => {
@@ -320,7 +322,7 @@ const Page = () => {
       });
 
       const pagesRes = await axios.get(
-       ` https://fb-assignment.onrender.com/pages?access_token=${response.accessToken}`
+        ` https://fb-assignment.onrender.com/pages?access_token=${response.accessToken}`
       );
       setPages(pagesRes.data.data);
     } catch (error) {
@@ -367,7 +369,7 @@ const Page = () => {
         return;
       }
 
-      setInsights(insightsRes.data.data || []);
+      setInsights(insightsRes.data || []);
       if (!customDateRange) {
         setShowDateFilter(true);
       }
@@ -381,6 +383,55 @@ const Page = () => {
   const applyDateFilter = () => {
     fetchInsights(dateRange);
   };
+
+  // const fetchInsights = async () => {
+  //     if (!selectedPage) return;
+
+  //     const pageData = pages.find((item) => item.id === selectedPage);
+
+  //     if (!pageData || !pageData.access_token) {
+  //       console.error("No page data or access token found for selected page");
+  //       return;
+  //     }
+
+  //     console.log("Fetching insights for page:", {
+  //       pageId: selectedPage,
+  //       tokenLength: pageData.access_token.length,
+  //     });
+
+  //     try {
+  //       const insightsRes = await axios.get(
+  //         `https://fb-assignment.onrender.com/page-insights`,
+  //         {
+  //           params: {
+  //             page_id: selectedPage,
+  //             access_token: pageData.access_token,
+  //           },
+  //         }
+  //       );
+
+  //       console.log("Insights response structure:", {
+  //         status: insightsRes.status,
+  //         hasData: !!insightsRes.data,
+  //         dataKeys: Object.keys(insightsRes.data || {}),
+  //       });
+
+  //       if (insightsRes.data.error) {
+  //         setError(insightsRes.data.error);
+  //         return;
+  //       }
+  //       console.log(insightsRes.data);
+  //       setInsights(insightsRes.data);
+  //     } catch (error) {
+  //       const errorMessage = error.response?.data?.error || error.message;
+  //       setError(errorMessage);
+  //       console.error("Detailed error:", {
+  //         message: error.message,
+  //         response: error.response?.data,
+  //         status: error.response?.status,
+  //       });
+  //     }
+  //   };
 
   const getMetricIcon = (metricName) => {
     switch (metricName) {
@@ -402,7 +453,7 @@ const Page = () => {
       page_fans: "Total Followers",
       page_engaged_users: "Total Engagement",
       page_impressions: "Total Impressions",
-      page_reactions_total: "Total Reactions"
+      page_reactions_total: "Total Reactions",
     };
     return nameMap[metricName] || metricName;
   };
@@ -508,9 +559,25 @@ const Page = () => {
                   >
                     {loading ? (
                       <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Loading...
                       </>
@@ -537,7 +604,7 @@ const Page = () => {
                         <ChevronDown className="w-4 h-4 ml-1" />
                       )}
                     </button>
-                    
+
                     <div className="flex flex-wrap gap-4 items-end">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -546,7 +613,12 @@ const Page = () => {
                         <input
                           type="date"
                           value={dateRange.since}
-                          onChange={(e) => setDateRange(prev => ({ ...prev, since: e.target.value }))}
+                          onChange={(e) =>
+                            setDateRange((prev) => ({
+                              ...prev,
+                              since: e.target.value,
+                            }))
+                          }
                           className="border border-gray-300 rounded-md p-2"
                         />
                       </div>
@@ -557,7 +629,12 @@ const Page = () => {
                         <input
                           type="date"
                           value={dateRange.until}
-                          onChange={(e) => setDateRange(prev => ({ ...prev, until: e.target.value }))}
+                          onChange={(e) =>
+                            setDateRange((prev) => ({
+                              ...prev,
+                              until: e.target.value,
+                            }))
+                          }
                           className="border border-gray-300 rounded-md p-2"
                         />
                       </div>
@@ -609,7 +686,10 @@ const Page = () => {
                         </p>
                         {metric.values && metric.values[0]?.end_time && (
                           <p className="mt-1 text-xs text-gray-500">
-                            Last updated: {new Date(metric.values[0].end_time).toLocaleDateString()}
+                            Last updated:{" "}
+                            {new Date(
+                              metric.values[0].end_time
+                            ).toLocaleDateString()}
                           </p>
                         )}
                       </div>
@@ -619,12 +699,12 @@ const Page = () => {
               </div>
             ) : selectedPage ? (
               <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-                <p className="text-gray-500">Select a page and click "Get Insights" to
-view the analytics data</p>
+                <p className="text-gray-500">
+                  Select a page and click "Get Insights" to view the analytics
+                  data
+                </p>
                 {error && (
-                  <p className="text-sm text-red-500 mt-2">
-                    Error: {error}
-                  </p>
+                  <p className="text-sm text-red-500 mt-2">Error: {error}</p>
                 )}
               </div>
             ) : null}
