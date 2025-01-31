@@ -41,12 +41,10 @@ const page = () => {
 
   const fetchInsights = async () => {
     if (!selectedPage) return;
-    const { accessToken } = user;
 
+    const access_token = pages.find((item) => item.id === selectedPage);
 
-    const access_token = pages.find(item => item.id === selectedPage);
-
-
+    console.log(access_token, "page token");
     try {
       const insightsRes = await axios.get(
         `https://fb-assignment.onrender.com/page-insights`,
@@ -57,7 +55,7 @@ const page = () => {
           },
         }
       );
-      console.log(insightsRes.data);
+      console.log(insightsRes.data, "insite data ");
       setInsights(insightsRes.data.data);
     } catch (error) {
       setError(error.message);
@@ -149,7 +147,6 @@ const page = () => {
             />
           </div>
         ) : (
-  
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
