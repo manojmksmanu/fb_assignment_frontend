@@ -329,6 +329,8 @@ const Page = () => {
         return;
       }
 
+      console.log(insightsRes.data,'insite data')
+
       setInsights(insightsRes.data || []);
       if (!customDateRange) {
         setShowDateFilter(true);
@@ -341,6 +343,8 @@ const Page = () => {
   };
 
   console.log(pages,'pages')
+
+  console.log(insights,'insites')
 
   const applyDateFilter = () => {
     fetchInsights(dateRange);
