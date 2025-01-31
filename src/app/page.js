@@ -39,9 +39,9 @@ const page = () => {
   };
 
   const fetchInsights = async () => {
-    console.log(selectedPage,"and", accessToken)
     if (!selectedPage) return;
     const { accessToken } = user;
+    console.log(selectedPage,"and", accessToken)
     try {
       const insightsRes = await axios.get(
         `https://fb-assignment.onrender.com/page-insights?page_id=${selectedPage}&access_token=${accessToken}`
