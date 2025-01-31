@@ -39,30 +39,54 @@ const page = () => {
     }
   };
 
-  const fetchInsights = async () => {
-    if (!selectedPage) return;
+const fetchInsights = async () => {
+  if (!selectedPage) return;
 
-    const access_token = pages.find((item) => item.id === selectedPage);
+  const pageData = pages.find((item) => item.id === selectedPage);
 
-    console.log(access_token.access_token, "page token");
-    try {
-      const insightsRes = await axios.get(
-        `https://fb-assignment.onrender.com/page-insights`,
-        {
-          params: {
-            page_id: selectedPage,
-            access_token: access_token.access_token,
-          },
-        }
-      );
-      console.log(insightsRes.data, "insite data ");
-      setInsights(insightsRes.data.data);
-    } catch (error) {
-      setError(error.message);
-      console.error("Error fetching insights:", error);
+  if (!pageData || !pageData.access_token) {
+    console.error("No page data or access token found for selected page");
+    return;
+  }
+
+  console.log("Fetching insights for page:", {
+    pageId: selectedPage,
+    tokenLength: pageData.access_token.length,
+  });
+
+  try {
+    const insightsRes = await axios.get(
+      `https://fb-assignment.onrender.com/page-insights`,
+      {
+        params: {
+          page_id: selectedPage,
+          access_token: pageData.access_token,
+        },
+      }
+    );
+
+    console.log("Insights response structure:", {
+      status: insightsRes.status,
+      hasData: !!insightsRes.data,
+      dataKeys: Object.keys(insightsRes.data || {}),
+    });
+
+    if (insightsRes.data.error) {
+      setError(insightsRes.data.error);
+      return;
     }
-  };
 
+    setInsights(insightsRes.data.data);
+  } catch (error) {
+    const errorMessage = error.response?.data?.error || error.message;
+    setError(errorMessage);
+    console.error("Detailed error:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+  }
+};
   const getMetricIcon = (metricName) => {
     if (metricName.includes("fan"))
       return <Users className="w-6 h-6 text-blue-500" />;
