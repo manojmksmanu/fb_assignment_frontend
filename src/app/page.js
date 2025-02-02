@@ -1,4 +1,3 @@
-"use client";
 import React, { useState } from "react";
 import FacebookLogin from "@greatsumini/react-facebook-login";
 import axios from "axios";
@@ -21,7 +20,7 @@ const Page = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showDateFilter, setShowDateFilter] = useState(false);
-  const [isFiltered, setIsFiltered] = useState(false); // Yeh line add karo
+  const [isFiltered, setIsFiltered] = useState(false);
 
   const [dateRange, setDateRange] = useState({
     since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
@@ -57,165 +56,30 @@ const Page = () => {
     }
   };
 
-// const fetchInsights = async (customDateRange = null) => {
-//   if (!selectedPage) return;
+  const fetchInsights = async (dateRange) => {
+    if (!selectedPage) return;
 
-//   const pageData = pages.find((item) => item.id === selectedPage);
-//   if (!pageData || !pageData.access_token) {
-//     console.error("No page data or access token found for selected page");
-//     return;
-//   }
-
-//   setLoading(true);
-//   setError(null);
-
-//   try {
-//     let params = {
-//       page_id: selectedPage,
-//       access_token: pageData.access_token,
-//     };
-
-//     console.log(params, "params");
-
-//     if (customDateRange) {
-//       const sinceTimestamp = Math.floor(
-//         new Date(customDateRange.since).getTime() / 1000
-//       );
-//       const untilTimestamp = Math.floor(
-//         new Date(customDateRange.until).getTime() / 1000
-//       );
-
-//       if (sinceTimestamp > untilTimestamp) {
-//         throw new Error("Invalid date range: 'since' must be before 'until'");
-//       }
-
-//       params.since = sinceTimestamp;
-//       params.until = untilTimestamp;
-//       setIsFiltered(true);
-//     } else {
-//       setIsFiltered(false);
-//     }
-
-//     console.log("Fetching insights with params:", params);
-
-//     const insightsRes = await axios.get(
-//       "https://fb-assignment.onrender.com/page-insights",
-//       { params }
-//     );
-
-//     if (insightsRes.data.error) {
-//       setError(insightsRes.data.error);
-//       return;
-//     }
-
-//     console.log(insightsRes.data.data, "insightsRes data data");
-//     setInsights(insightsRes.data.data);
-//     setShowDateFilter(true);
-//   } catch (error) {
-//     console.log("API Error:", error.response?.data || error.message);
-//     setError(error.response?.data?.error || error.message);
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-
-const fetchInsights = async () => {
-  if (!selectedPage) return;
-
-  const pageData = pages.find((item) => item.id === selectedPage);
-  if (!pageData || !pageData.access_token) {
-    console.error("No page data or access token found for selected page");
-    return;
-  }
-
-  setLoading(true);
-  setError(null);
-
-  try {
-    let params = {
-      page_id: selectedPage,
-      access_token: pageData.access_token,
-    };
-
-    console.log(params, "params");
-
-    setIsFiltered(false); // No filter applied
-
-    console.log("Fetching insights with params:", params);
-
-    const insightsRes = await axios.get(
-      "https://fb-assignment.onrender.com/page-insights",
-      { params }
-    );
-
-    console.log("API Response:", insightsRes.data);
-
-    if (insightsRes.data.error) {
-      setError(insightsRes.data.error);
-      return;
+    try {
+      const response = await axios.get(
+        `https://fb-assignment.onrender.com/insights?access_token=${user.accessToken}&page_id=${selectedPage}&since=${dateRange.since}&until=${dateRange.until}`
+      );
+      setInsights(response.data);
+    } catch (error) {
+      setError("Failed to fetch insights");
     }
-
-    // Check if data is empty
-    if (!insightsRes.data.data || insightsRes.data.data.length === 0) {
-      console.log("No data available in the response.");
-      setError("No data available.");
-      return;
-    }
-
-    console.log(insightsRes.data.data, "insightsRes data data");
-    setInsights(insightsRes.data.data);
-    setShowDateFilter(false); // Hide date filter since it's not being used
-  } catch (error) {
-    console.log("API Error:", error.response?.data || error.message);
-    setError(error.response?.data?.error || error.message);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  console.log(pages, "pages");
-
-  console.log(insights, "insites");
-
-  const applyDateFilter = () => {
-    fetchInsights(dateRange);
   };
 
   const removeFilter = () => {
-    setIsFiltered(false);
     setDateRange({
       since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0],
       until: new Date().toISOString().split("T")[0],
     });
-    fetchInsights(); // This will fetch lifetime data
+    setIsFiltered(false);
+    fetchInsights({ since: dateRange.since, until: dateRange.until });
   };
 
-  const getMetricIcon = (metricName) => {
-    switch (metricName) {
-      case "page_fans":
-        return <Users className="w-6 h-6 text-blue-500" />;
-      case "page_engaged_users":
-        return <BarChart className="w-6 h-6 text-orange-500" />;
-      case "page_impressions":
-        return <Eye className="w-6 h-6 text-green-500" />;
-      case "page_reactions_total":
-        return <ThumbsUp className="w-6 h-6 text-purple-500" />;
-      default:
-        return <BarChart className="w-6 h-6 text-gray-500" />;
-    }
-  };
-
-  const getMetricName = (metricName) => {
-    const nameMap = {
-      page_fans: "Total Followers",
-      page_engaged_users: "Total Engagement",
-      page_impressions: "Total Impressions",
-      page_reactions_total: "Total Reactions",
-    };
-    return nameMap[metricName] || metricName;
-  };
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
@@ -311,7 +175,7 @@ const fetchInsights = async () => {
                   </select>
 
                   <button
-                    onClick={() => fetchInsights()}
+                    onClick={() => fetchInsights(dateRange)}
                     disabled={!selectedPage || loading}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -348,212 +212,19 @@ const fetchInsights = async () => {
                   </button>
                 </div>
 
-                {showDateFilter && insights && (
-                  <div className="mt-4 border-t pt-4">
-                    <div className="flex justify-between items-center mb-4">
-                      <button
-                        onClick={() => setShowDateFilter(!showDateFilter)}
-                        className="flex items-center text-sm text-gray-600 hover:text-gray-900"
-                      >
-                        <Calendar className="w-4 h-4 mr-2" />
-                        {isFiltered
-                          ? "Custom Date Range Applied"
-                          : "Custom Date Range"}
-                        {showDateFilter ? (
-                          <ChevronUp className="w-4 h-4 ml-1" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 ml-1" />
-                        )}
-                      </button>
-
-                      {isFiltered && (
-                        <button
-                          onClick={removeFilter}
-                          className="text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          Remove Filter
-                        </button>
-                      )}
+                {/* Insights section */}
+                {insights && insights.length > 0 && (
+                  <div className="mt-4">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      Insights Overview
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                      {/* Render your insights data here */}
                     </div>
-
-                    {showDateFilter && (
-                      <div className="flex flex-wrap gap-4 items-end">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Start Date
-                          </label>
-                          <input
-                            type="date"
-                            value={dateRange.since}
-                            onChange={(e) =>
-                              setDateRange((prev) => ({
-                                ...prev,
-                                since: e.target.value,
-                              }))
-                            }
-                            className="border border-gray-300 rounded-md p-2"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            End Date
-                          </label>
-                          <input
-                            type="date"
-                            value={dateRange.until}
-                            onChange={(e) =>
-                              setDateRange((prev) => ({
-                                ...prev,
-                                until: e.target.value,
-                              }))
-                            }
-                            className="border border-gray-300 rounded-md p-2"
-                          />
-                        </div>
-                        <button
-                          onClick={() => fetchInsights(dateRange)}
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                          Apply Filter
-                        </button>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
             </div>
-            <h1>New one</h1>
-            {insights && insights.length > 0 ? (
-              <div>
-                {/* Filter Status and Controls */}
-                {showDateFilter && (
-                  <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-5 h-5 text-blue-500" />
-                        <span className="font-medium text-gray-700">
-                          {isFiltered ? "Filtered Data" : "Lifetime Data"}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center space-x-4">
-                        {isFiltered ? (
-                          <>
-                            <span className="text-sm text-gray-600">
-                              {new Date(dateRange.since).toLocaleDateString()} -{" "}
-                              {new Date(dateRange.until).toLocaleDateString()}
-                            </span>
-                            <button
-                              onClick={removeFilter}
-                              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                            >
-                              Reset to Lifetime
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            onClick={() => setShowDateFilter(true)}
-                            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                          >
-                            Add Date Filter
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Date Range Selector */}
-                    {showDateFilter && (
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <div className="flex flex-wrap gap-4 items-end">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Start Date
-                            </label>
-                            <input
-                              type="date"
-                              value={dateRange.since}
-                              onChange={(e) =>
-                                setDateRange((prev) => ({
-                                  ...prev,
-                                  since: e.target.value,
-                                }))
-                              }
-                              className="border border-gray-300 rounded-md p-2"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              End Date
-                            </label>
-                            <input
-                              type="date"
-                              value={dateRange.until}
-                              onChange={(e) =>
-                                setDateRange((prev) => ({
-                                  ...prev,
-                                  until: e.target.value,
-                                }))
-                              }
-                              className="border border-gray-300 rounded-md p-2"
-                            />
-                          </div>
-                          <button
-                            onClick={() => fetchInsights(dateRange)}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                          >
-                            Apply Filter
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Metrics Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {insights.map((metric, index) => (
-                    <div
-                      key={metric.name || index}
-                      className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-start space-x-4">
-                        {getMetricIcon(metric.name)}
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-600">
-                            {getMetricName(metric.name)}
-                          </p>
-                          <p className="mt-2 text-2xl font-semibold text-gray-900">
-                            {metric.values && metric.values[0]
-                              ? parseInt(
-                                  metric.values[0].value
-                                ).toLocaleString()
-                              : "0"}
-                          </p>
-                          {metric.values && metric.values[0]?.end_time && (
-                            <p className="mt-1 text-xs text-gray-500">
-                              Last updated:{" "}
-                              {new Date(
-                                metric.values[0].end_time
-                              ).toLocaleDateString()}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-                <p className="text-gray-500">
-                  Select a page and click "Get Insights" to view the analytics
-                  data
-                </p>
-                {error && (
-                  <p className="text-sm text-red-500 mt-2">Error: {error}</p>
-                )}
-              </div>
-            )}
           </div>
         )}
       </main>
