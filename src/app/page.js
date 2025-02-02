@@ -209,7 +209,28 @@ const Page = () => {
                       Insights Overview
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                      {/* Render your insights data here */}
+                      <div>
+                        <h2>Page Insights</h2>
+                        {insightsData?.success ? (
+                          <div>
+                            {insightsData.data.map((metric, index) => (
+                              <div key={index}>
+                                <h3>{metric.title}</h3>
+                                <p>{metric.description}</p>
+                                <ul>
+                                  {metric.values.map((value, i) => (
+                                    <li key={i}>
+                                      {value.end_time}: {value.value}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p>No data available for the requested metrics.</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
