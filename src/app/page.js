@@ -62,11 +62,11 @@ const Page = () => {
       const response = await axios.get(
         `https://fb-assignment.onrender.com/page-insights?access_token=${pageData.access_token}&page_id=${selectedPage}`
       );
-      console.log(response.data,'response')
+      console.log(response.data, "response");
       setInsights(response.data);
     } catch (error) {
       setError("Failed to fetch insights");
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -203,37 +203,31 @@ const Page = () => {
                 </div>
 
                 {/* Insights section */}
-                {insights && insights.length > 0 && (
-                  <div className="mt-4">
-                    <h2 className="text-xl font-semibold text-gray-900">
-                      Insights Overview
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                  <div>
+                    <h2>Page Insights</h2>
+                    {insights?.success && insights.data.length > 0 ? (
                       <div>
-                        <h2>Page Insights</h2>
-                        {insights?.success && insights.data.length > 0 ? (
-                          <div>
-                            {insights.data.map((metric, index) => (
-                              <div key={index}>
-                                <h3>{metric.title}</h3>
-                                <p>{metric.description}</p>
-                                <ul>
-                                  {metric.values.map((value, i) => (
-                                    <li key={i}>
-                                      {value.end_time}: {value.value}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            ))}
+                        {insights.data.map((metric, index) => (
+                          <div key={index}>
+                            <h3>{metric.title}</h3>
+                            <p>{metric.description}</p>
+                            <ul>
+                              {metric.values.map((value, i) => (
+                                <li key={i}>
+                                  {value.end_time}: {value.value}
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                        ) : (
-                          <p>No data available for the requested metrics.</p>
-                        )}
+                        ))}
                       </div>
-                    </div>
+                    ) : (
+                      <p>No data available for the requested metrics.</p>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
