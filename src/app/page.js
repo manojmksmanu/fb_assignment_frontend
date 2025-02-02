@@ -1,11 +1,8 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import FacebookLogin from "@greatsumini/react-facebook-login";
 import axios from "axios";
-import {
-  Layout,
-  BarChart,
-} from "lucide-react";
+import { Layout, BarChart } from "lucide-react";
 
 const Page = () => {
   const [user, setUser] = useState(null);
@@ -49,20 +46,31 @@ const Page = () => {
     }
   };
 
+  console.log(pages);
   const fetchInsights = async (dateRange) => {
     if (!selectedPage) return;
+    const pageData = pages.find((item) => item.id === selectedPage);
+    if (!pageData || !pageData.access_token) {
+      console.error("No page data or access token found for selected page");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
 
     try {
       const response = await axios.get(
-        `https://fb-assignment.onrender.com/insights?access_token=${user.accessToken}&page_id=${selectedPage}&since=${dateRange.since}&until=${dateRange.until}`
+        `https://fb-assignment.onrender.com/insights?access_token=${pageData.access_token}&page_id=${selectedPage}`
       );
+      console.log(response.data,'response')
       setInsights(response.data);
     } catch (error) {
       setError("Failed to fetch insights");
+    }finally{
+      setLoading(false);
     }
   };
 
- 
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
