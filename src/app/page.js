@@ -209,19 +209,38 @@ const Page = () => {
                     <h2>Page Insights</h2>
                     {insights?.success && insights.data.length > 0 ? (
                       <div>
-                        {insights.data.map((metric, index) => (
-                          <div key={index}>
-                            <h3>{metric.title}</h3>
-                            <p>{metric.description}</p>
-                            <ul>
-                              {metric.values.map((value, i) => (
-                                <li key={i}>
-                                  {value.end_time}: {value.value}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
+                        <div className="space-y-6">
+                          {insights.data.map((metric, index) => (
+                            <div
+                              key={index}
+                              className="bg-white p-6 rounded-lg shadow-md"
+                            >
+                              {/* Metric Title */}
+                              <h3 className="text-xl font-semibold text-gray-800">
+                                {metric.title}
+                              </h3>
+
+                              {/* Metric Description */}
+                              <p className="text-sm text-gray-600 mt-2">
+                                {metric.description}
+                              </p>
+
+                              {/* Metric Values List */}
+                              <ul className="mt-4 space-y-2">
+                                {metric.values.map((value, i) => (
+                                  <li key={i} className="flex justify-between">
+                                    <span className="text-gray-700">
+                                      {value.end_time}
+                                    </span>
+                                    <span className="font-medium text-blue-600">
+                                      {value.value}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     ) : (
                       <p>No data available for the requested metrics.</p>
