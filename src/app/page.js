@@ -139,8 +139,7 @@ const fetchInsights = async () => {
 
     console.log(params, "params");
 
-    // No date filtering logic
-    setIsFiltered(false); // Indicating no filter is applied
+    setIsFiltered(false); // No filter applied
 
     console.log("Fetching insights with params:", params);
 
@@ -149,8 +148,17 @@ const fetchInsights = async () => {
       { params }
     );
 
+    console.log("API Response:", insightsRes.data);
+
     if (insightsRes.data.error) {
       setError(insightsRes.data.error);
+      return;
+    }
+
+    // Check if data is empty
+    if (!insightsRes.data.data || insightsRes.data.data.length === 0) {
+      console.log("No data available in the response.");
+      setError("No data available.");
       return;
     }
 
