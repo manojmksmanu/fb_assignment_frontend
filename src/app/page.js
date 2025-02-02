@@ -60,7 +60,7 @@ const Page = () => {
 
     try {
       const response = await axios.get(
-        `https://fb-assignment.onrender.com/insights?access_token=${pageData.access_token}&page_id=${selectedPage}`
+        `https://fb-assignment.onrender.com/page-insights?access_token=${pageData.access_token}&page_id=${selectedPage}`
       );
       console.log(response.data,'response')
       setInsights(response.data);
