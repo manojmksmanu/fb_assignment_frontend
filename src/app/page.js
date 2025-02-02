@@ -21,6 +21,8 @@ const Page = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showDateFilter, setShowDateFilter] = useState(false);
+  const [isFiltered, setIsFiltered] = useState(false); // Yeh line add karo
+
   const [dateRange, setDateRange] = useState({
     since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
       .toISOString()
@@ -112,17 +114,16 @@ const Page = () => {
     fetchInsights(dateRange);
   };
 
-    const removeFilter = () => {
-      setIsFiltered(false);
-      setDateRange({
-        since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-        until: new Date().toISOString().split("T")[0],
-      });
-      fetchInsights(); // This will fetch lifetime data
-    };
-
+  const removeFilter = () => {
+    setIsFiltered(false);
+    setDateRange({
+      since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0],
+      until: new Date().toISOString().split("T")[0],
+    });
+    fetchInsights(); // This will fetch lifetime data
+  };
 
   const getMetricIcon = (metricName) => {
     switch (metricName) {
@@ -139,15 +140,15 @@ const Page = () => {
     }
   };
 
-const getMetricName = (metricName) => {
-  const nameMap = {
-    page_fans: "Total Followers",
-    page_engaged_users: "Total Engagement",
-    page_impressions: "Total Impressions",
-    page_reactions_total: "Total Reactions",
+  const getMetricName = (metricName) => {
+    const nameMap = {
+      page_fans: "Total Followers",
+      page_engaged_users: "Total Engagement",
+      page_impressions: "Total Impressions",
+      page_reactions_total: "Total Reactions",
+    };
+    return nameMap[metricName] || metricName;
   };
-  return nameMap[metricName] || metricName;
-};
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
@@ -354,68 +355,7 @@ const getMetricName = (metricName) => {
                 )}
               </div>
             </div>
-
-            {/* {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="animate-pulse flex space-x-4">
-                      <div className="rounded-full bg-slate-200 h-10 w-10"></div>
-                      <div className="flex-1 space-y-6">
-                        <div className="h-2 bg-slate-200 rounded"></div>
-                        <div className="space-y-3">
-                          <div className="h-2 bg-slate-200 rounded"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : insights && insights.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {insights.data.map((metric, index) => (
-                  <div
-                    key={metric.name || index}
-                    className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-start space-x-4">
-                      {getMetricIcon(metric.name)}
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-600">
-                          {getMetricName(metric.name)}
-                        </p>
-                        <p className="mt-2 text-2xl font-semibold text-gray-900">
-                          {metric.values && metric.values[0]
-                            ? parseInt(metric.values[0].value).toLocaleString()
-                            : "0"}
-                        </p>
-                        {metric.values && metric.values[0]?.end_time && (
-                          <p className="mt-1 text-xs text-gray-500">
-                            Last updated:{" "}
-                            {new Date(
-                              metric.values[0].end_time
-                            ).toLocaleDateString()}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : selectedPage ? (
-              <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-                <p className="text-gray-500">
-                  Select a page and click "Get Insights" to view the analytics
-                  data
-                </p>
-                {error && (
-                  <p className="text-sm text-red-500 mt-2">Error: {error}</p>
-                )}
-              </div>
-            ) : null} */}
-            <h1>
-              New one
-            </h1>
+            <h1>New one</h1>
             {insights && insights.length > 0 ? (
               <div>
                 {/* Filter Status and Controls */}
