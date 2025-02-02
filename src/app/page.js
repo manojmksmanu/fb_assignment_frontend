@@ -66,6 +66,8 @@ const Page = () => {
       return;
     }
 
+    console.log(pageData,'pageData')
+
     setLoading(true);
     setError(null);
 
@@ -100,6 +102,7 @@ const Page = () => {
       setInsights(insightsRes.data.data);
       setShowDateFilter(true);
     } catch (error) {
+      console.log(error.message)
       setError(error.response?.data?.error || error.message);
     } finally {
       setLoading(false);
