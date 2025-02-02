@@ -75,7 +75,7 @@ const fetchInsights = async (customDateRange = null) => {
       access_token: pageData.access_token,
     };
 
-    console.log(params,'params')
+    console.log(params, "params");
 
     if (customDateRange) {
       const sinceTimestamp = Math.floor(
@@ -107,7 +107,8 @@ const fetchInsights = async (customDateRange = null) => {
       setError(insightsRes.data.error);
       return;
     }
-console.log(insightsRes.data.data,'insightsResd data data')
+
+    console.log(insightsRes.data.data, "insightsRes data data");
     setInsights(insightsRes.data.data);
     setShowDateFilter(true);
   } catch (error) {
