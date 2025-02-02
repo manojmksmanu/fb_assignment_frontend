@@ -206,45 +206,48 @@ const Page = () => {
               {/* Insights section */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                 <div className="col-span-1 sm:col-span-2">
-                  {selectedPage &
+                  {/* {selectedPage &
                   (
                     <h2 className="text-2xl font-semibold text-gray-800 mb-4">
                       Page Insights
                     </h2>
-                  )}
-                  {insights?.success && insights.data.length > 0 ? (
-                    <div className="space-y-6">
-                      {insights.data.map((metric, index) => (
-                        <div
-                          key={index}
-                          className="bg-white p-6 rounded-lg shadow-md"
-                        >
-                          <h3 className="text-xl font-semibold text-gray-800">
-                            {metric.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 mt-2">
-                            {metric.description}
-                          </p>
-                          <ul className="mt-4 space-y-2">
-                            {metric.values.map((value, i) => (
-                              <li key={i} className="flex justify-between">
-                                <span className="text-gray-700">
-                                  {new Date(value.end_time).toLocaleString()}
-                                </span>
-                                <span className="font-medium text-blue-600">
-                                  {value.value}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    selectedPage && (
-                      <p>No data available for the requested metrics.</p>
-                    )
-                  )}
+                  
+                  )} */}
+
+                  {insights &&
+                    (insights?.success && insights.data.length > 0 ? (
+                      <div className="space-y-6">
+                        {insights.data.map((metric, index) => (
+                          <div
+                            key={index}
+                            className="bg-white p-6 rounded-lg shadow-md"
+                          >
+                            <h3 className="text-xl font-semibold text-gray-800">
+                              {metric.title}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-2">
+                              {metric.description}
+                            </p>
+                            <ul className="mt-4 space-y-2">
+                              {metric.values.map((value, i) => (
+                                <li key={i} className="flex justify-between">
+                                  <span className="text-gray-700">
+                                    {new Date(value.end_time).toLocaleString()}
+                                  </span>
+                                  <span className="font-medium text-blue-600">
+                                    {value.value}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      selectedPage && (
+                        <p>No data available for the requested metrics.</p>
+                      )
+                    ))}
                 </div>
               </div>
             </div>
