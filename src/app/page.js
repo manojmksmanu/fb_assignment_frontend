@@ -4,12 +4,6 @@ import axios from "axios";
 import {
   Layout,
   BarChart,
-  Users,
-  Eye,
-  ThumbsUp,
-  Calendar,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 
 const Page = () => {
@@ -19,8 +13,6 @@ const Page = () => {
   const [insights, setInsights] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showDateFilter, setShowDateFilter] = useState(false);
-  const [isFiltered, setIsFiltered] = useState(false);
 
   const [dateRange, setDateRange] = useState({
     since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
@@ -69,17 +61,7 @@ const Page = () => {
     }
   };
 
-  const removeFilter = () => {
-    setDateRange({
-      since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0],
-      until: new Date().toISOString().split("T")[0],
-    });
-    setIsFiltered(false);
-    fetchInsights({ since: dateRange.since, until: dateRange.until });
-  };
-
+ 
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
@@ -160,7 +142,6 @@ const Page = () => {
                     className="block w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm  focus:ring-blue-500 focus:border-blue-500 text-slate-800"
                     onChange={(e) => {
                       setSelectedPage(e.target.value);
-                      setShowDateFilter(false);
                       setInsights(null);
                     }}
                     value={selectedPage}
