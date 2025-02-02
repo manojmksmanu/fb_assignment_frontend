@@ -36,7 +36,7 @@ const Page = () => {
       });
 
       const pagesRes = await axios.get(
-        ` https://fb-assignment.onrender.com/pages?access_token=${response.accessToken}`
+        `https://fb-assignment.onrender.com/pages?access_token=${response.accessToken}`
       );
       setPages(pagesRes.data.data);
     } catch (error) {
@@ -46,12 +46,14 @@ const Page = () => {
     }
   };
 
-  console.log(pages);
   const fetchInsights = async (dateRange) => {
-    if (!selectedPage) return;
+    if (!selectedPage) {
+      setError("Please select a page first.");
+      return;
+    }
     const pageData = pages.find((item) => item.id === selectedPage);
     if (!pageData || !pageData.access_token) {
-      console.error("No page data or access token found for selected page");
+      setError("No page data or access token found for selected page");
       return;
     }
 
@@ -62,7 +64,6 @@ const Page = () => {
       const response = await axios.get(
         `https://fb-assignment.onrender.com/page-insights?access_token=${pageData.access_token}&page_id=${selectedPage}`
       );
-      console.log(response.data, "response");
       setInsights(response.data);
     } catch (error) {
       setError("Failed to fetch insights");
@@ -170,83 +171,54 @@ const Page = () => {
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
-                      <>
-                        <svg
-                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                        Loading...
-                      </>
+                      <div className="animate-spin w-5 h-5 mr-3 border-4 border-t-4 border-blue-600 rounded-full" />
                     ) : (
-                      <>
-                        <BarChart className="w-4 h-4 mr-2" />
-                        Get Insights
-                      </>
+                      <BarChart className="w-4 h-4 mr-2" />
                     )}
+                    Get Insights
                   </button>
                 </div>
 
                 {/* Insights section */}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                  <div>
-                    <h2>Page Insights</h2>
-                    {insights?.success && insights.data.length > 0 ? (
-                      <div>
-                        <div className="space-y-6">
-                          {insights.data.map((metric, index) => (
-                            <div
-                              key={index}
-                              className="bg-white p-6 rounded-lg shadow-md"
-                            >
-                              {/* Metric Title */}
-                              <h3 className="text-xl font-semibold text-gray-800">
-                                {metric.title}
-                              </h3>
-
-                              {/* Metric Description */}
-                              <p className="text-sm text-gray-600 mt-2">
-                                {metric.description}
-                              </p>
-
-                              {/* Metric Values List */}
-                              <ul className="mt-4 space-y-2">
-                                {metric.values.map((value, i) => (
-                                  <li key={i} className="flex justify-between">
-                                    <span className="text-gray-700">
-                                      {value.end_time}
-                                    </span>
-                                    <span className="font-medium text-blue-600">
-                                      {value.value}
-                                    </span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <p>No data available for the requested metrics.</p>
-                    )}
+                {!selectedPage && (
+                  <div className="mt-4 text-center text-gray-500">
+                    <p>Please select a page to view insights.</p>
                   </div>
-                </div>
+                )}
+
+                {insights?.success && insights.data.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                    {insights.data.map((metric, index) => (
+                      <div
+                        key={index}
+                        className="bg-white p-6 rounded-lg shadow-md"
+                      >
+                        <h3 className="text-xl font-semibold text-gray-800">
+                          {metric.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-2">
+                          {metric.description}
+                        </p>
+                        <ul className="mt-4 space-y-2">
+                          {metric.values.map((value, i) => (
+                            <li key={i} className="flex justify-between">
+                              <span className="text-gray-700">
+                                {value.end_time}
+                              </span>
+                              <span className="font-medium text-blue-600">
+                                {value.value}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-6 text-center text-gray-500">
+                    <p>No data available for the requested metrics.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
