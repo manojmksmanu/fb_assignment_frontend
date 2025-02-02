@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from "react";
 import FacebookLogin from "@greatsumini/react-facebook-login";
 import axios from "axios";
