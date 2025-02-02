@@ -57,7 +57,69 @@ const Page = () => {
     }
   };
 
-const fetchInsights = async (customDateRange = null) => {
+// const fetchInsights = async (customDateRange = null) => {
+//   if (!selectedPage) return;
+
+//   const pageData = pages.find((item) => item.id === selectedPage);
+//   if (!pageData || !pageData.access_token) {
+//     console.error("No page data or access token found for selected page");
+//     return;
+//   }
+
+//   setLoading(true);
+//   setError(null);
+
+//   try {
+//     let params = {
+//       page_id: selectedPage,
+//       access_token: pageData.access_token,
+//     };
+
+//     console.log(params, "params");
+
+//     if (customDateRange) {
+//       const sinceTimestamp = Math.floor(
+//         new Date(customDateRange.since).getTime() / 1000
+//       );
+//       const untilTimestamp = Math.floor(
+//         new Date(customDateRange.until).getTime() / 1000
+//       );
+
+//       if (sinceTimestamp > untilTimestamp) {
+//         throw new Error("Invalid date range: 'since' must be before 'until'");
+//       }
+
+//       params.since = sinceTimestamp;
+//       params.until = untilTimestamp;
+//       setIsFiltered(true);
+//     } else {
+//       setIsFiltered(false);
+//     }
+
+//     console.log("Fetching insights with params:", params);
+
+//     const insightsRes = await axios.get(
+//       "https://fb-assignment.onrender.com/page-insights",
+//       { params }
+//     );
+
+//     if (insightsRes.data.error) {
+//       setError(insightsRes.data.error);
+//       return;
+//     }
+
+//     console.log(insightsRes.data.data, "insightsRes data data");
+//     setInsights(insightsRes.data.data);
+//     setShowDateFilter(true);
+//   } catch (error) {
+//     console.log("API Error:", error.response?.data || error.message);
+//     setError(error.response?.data?.error || error.message);
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+const fetchInsights = async () => {
   if (!selectedPage) return;
 
   const pageData = pages.find((item) => item.id === selectedPage);
@@ -77,24 +139,8 @@ const fetchInsights = async (customDateRange = null) => {
 
     console.log(params, "params");
 
-    if (customDateRange) {
-      const sinceTimestamp = Math.floor(
-        new Date(customDateRange.since).getTime() / 1000
-      );
-      const untilTimestamp = Math.floor(
-        new Date(customDateRange.until).getTime() / 1000
-      );
-
-      if (sinceTimestamp > untilTimestamp) {
-        throw new Error("Invalid date range: 'since' must be before 'until'");
-      }
-
-      params.since = sinceTimestamp;
-      params.until = untilTimestamp;
-      setIsFiltered(true);
-    } else {
-      setIsFiltered(false);
-    }
+    // No date filtering logic
+    setIsFiltered(false); // Indicating no filter is applied
 
     console.log("Fetching insights with params:", params);
 
@@ -110,7 +156,7 @@ const fetchInsights = async (customDateRange = null) => {
 
     console.log(insightsRes.data.data, "insightsRes data data");
     setInsights(insightsRes.data.data);
-    setShowDateFilter(true);
+    setShowDateFilter(false); // Hide date filter since it's not being used
   } catch (error) {
     console.log("API Error:", error.response?.data || error.message);
     setError(error.response?.data?.error || error.message);
@@ -118,7 +164,6 @@ const fetchInsights = async (customDateRange = null) => {
     setLoading(false);
   }
 };
-
 
   console.log(pages, "pages");
 
