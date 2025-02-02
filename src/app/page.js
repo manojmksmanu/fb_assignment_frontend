@@ -73,7 +73,6 @@ const Page = () => {
         access_token: pageData.access_token,
       };
 
-      // Check if custom date range is provided
       if (customDateRange) {
         params.since = Math.floor(
           new Date(customDateRange.since).getTime() / 1000
@@ -81,10 +80,9 @@ const Page = () => {
         params.until = Math.floor(
           new Date(customDateRange.until).getTime() / 1000
         );
-        params.period = "total_over_range"; // Use this for custom ranges
+        setIsFiltered(true);
       } else {
-        // Default to lifetime insights if no custom date range
-        params.period = "lifetime"; // Set period to lifetime
+        setIsFiltered(false);
       }
 
       const insightsRes = await axios.get(
@@ -97,12 +95,8 @@ const Page = () => {
         return;
       }
 
-      console.log(insightsRes.data.data, "insight data");
-
-      setInsights(insightsRes.data.data || []);
-      if (!customDateRange) {
-        setShowDateFilter(true); // Show date filter option only if lifetime data is fetched
-      }
+      setInsights(insightsRes.data.data);
+      setShowDateFilter(true);
     } catch (error) {
       setError(error.response?.data?.error || error.message);
     } finally {
@@ -118,54 +112,17 @@ const Page = () => {
     fetchInsights(dateRange);
   };
 
-  // const fetchInsights = async () => {
-  //     if (!selectedPage) return;
+    const removeFilter = () => {
+      setIsFiltered(false);
+      setDateRange({
+        since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
+        until: new Date().toISOString().split("T")[0],
+      });
+      fetchInsights(); // This will fetch lifetime data
+    };
 
-  //     const pageData = pages.find((item) => item.id === selectedPage);
-
-  //     if (!pageData || !pageData.access_token) {
-  //       console.error("No page data or access token found for selected page");
-  //       return;
-  //     }
-
-  //     console.log("Fetching insights for page:", {
-  //       pageId: selectedPage,
-  //       tokenLength: pageData.access_token.length,
-  //     });
-
-  //     try {
-  //       const insightsRes = await axios.get(
-  //         `https://fb-assignment.onrender.com/page-insights`,
-  //         {
-  //           params: {
-  //             page_id: selectedPage,
-  //             access_token: pageData.access_token,
-  //           },
-  //         }
-  //       );
-
-  //       console.log("Insights response structure:", {
-  //         status: insightsRes.status,
-  //         hasData: !!insightsRes.data,
-  //         dataKeys: Object.keys(insightsRes.data || {}),
-  //       });
-
-  //       if (insightsRes.data.error) {
-  //         setError(insightsRes.data.error);
-  //         return;
-  //       }
-  //       console.log(insightsRes.data);
-  //       setInsights(insightsRes.data);
-  //     } catch (error) {
-  //       const errorMessage = error.response?.data?.error || error.message;
-  //       setError(errorMessage);
-  //       console.error("Detailed error:", {
-  //         message: error.message,
-  //         response: error.response?.data,
-  //         status: error.response?.status,
-  //       });
-  //     }
-  //   };
 
   const getMetricIcon = (metricName) => {
     switch (metricName) {
@@ -182,16 +139,15 @@ const Page = () => {
     }
   };
 
-  const getMetricName = (metricName) => {
-    const nameMap = {
-      page_fans: "Total Followers",
-      page_engaged_users: "Total Engagement",
-      page_impressions: "Total Impressions",
-      page_reactions_total: "Total Reactions",
-    };
-    return nameMap[metricName] || metricName;
+const getMetricName = (metricName) => {
+  const nameMap = {
+    page_fans: "Total Followers",
+    page_engaged_users: "Total Engagement",
+    page_impressions: "Total Impressions",
+    page_reactions_total: "Total Reactions",
   };
-
+  return nameMap[metricName] || metricName;
+};
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
@@ -326,59 +282,74 @@ const Page = () => {
 
                 {showDateFilter && insights && (
                   <div className="mt-4 border-t pt-4">
-                    <button
-                      onClick={() => setShowDateFilter(!showDateFilter)}
-                      className="flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4"
-                    >
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Custom Date Range
-                      {showDateFilter ? (
-                        <ChevronUp className="w-4 h-4 ml-1" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 ml-1" />
-                      )}
-                    </button>
-
-                    <div className="flex flex-wrap gap-4 items-end">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Start Date
-                        </label>
-                        <input
-                          type="date"
-                          value={dateRange.since}
-                          onChange={(e) =>
-                            setDateRange((prev) => ({
-                              ...prev,
-                              since: e.target.value,
-                            }))
-                          }
-                          className="border border-gray-300 rounded-md p-2"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          End Date
-                        </label>
-                        <input
-                          type="date"
-                          value={dateRange.until}
-                          onChange={(e) =>
-                            setDateRange((prev) => ({
-                              ...prev,
-                              until: e.target.value,
-                            }))
-                          }
-                          className="border border-gray-300 rounded-md p-2"
-                        />
-                      </div>
+                    <div className="flex justify-between items-center mb-4">
                       <button
-                        onClick={applyDateFilter}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        onClick={() => setShowDateFilter(!showDateFilter)}
+                        className="flex items-center text-sm text-gray-600 hover:text-gray-900"
                       >
-                        Apply Filter
+                        <Calendar className="w-4 h-4 mr-2" />
+                        {isFiltered
+                          ? "Custom Date Range Applied"
+                          : "Custom Date Range"}
+                        {showDateFilter ? (
+                          <ChevronUp className="w-4 h-4 ml-1" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 ml-1" />
+                        )}
                       </button>
+
+                      {isFiltered && (
+                        <button
+                          onClick={removeFilter}
+                          className="text-sm text-blue-600 hover:text-blue-800"
+                        >
+                          Remove Filter
+                        </button>
+                      )}
                     </div>
+
+                    {showDateFilter && (
+                      <div className="flex flex-wrap gap-4 items-end">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Start Date
+                          </label>
+                          <input
+                            type="date"
+                            value={dateRange.since}
+                            onChange={(e) =>
+                              setDateRange((prev) => ({
+                                ...prev,
+                                since: e.target.value,
+                              }))
+                            }
+                            className="border border-gray-300 rounded-md p-2"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            End Date
+                          </label>
+                          <input
+                            type="date"
+                            value={dateRange.until}
+                            onChange={(e) =>
+                              setDateRange((prev) => ({
+                                ...prev,
+                                until: e.target.value,
+                              }))
+                            }
+                            className="border border-gray-300 rounded-md p-2"
+                          />
+                        </div>
+                        <button
+                          onClick={() => fetchInsights(dateRange)}
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                          Apply Filter
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -442,37 +413,128 @@ const Page = () => {
                 )}
               </div>
             ) : null} */}
-
+            <h1>
+              New one
+            </h1>
             {insights && insights.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {insights.map((metric, index) => (
-                  <div
-                    key={metric.name || index}
-                    className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-start space-x-4">
-                      {getMetricIcon(metric.name)}
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-600">
-                          {getMetricName(metric.name)}
-                        </p>
-                        <p className="mt-2 text-2xl font-semibold text-gray-900">
-                          {metric.values && metric.values[0]
-                            ? parseInt(metric.values[0].value).toLocaleString()
-                            : "0"}
-                        </p>
-                        {metric.values && metric.values[0]?.end_time && (
-                          <p className="mt-1 text-xs text-gray-500">
-                            Last updated:{" "}
-                            {new Date(
-                              metric.values[0].end_time
-                            ).toLocaleDateString()}
-                          </p>
+              <div>
+                {/* Filter Status and Controls */}
+                {showDateFilter && (
+                  <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="w-5 h-5 text-blue-500" />
+                        <span className="font-medium text-gray-700">
+                          {isFiltered ? "Filtered Data" : "Lifetime Data"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center space-x-4">
+                        {isFiltered ? (
+                          <>
+                            <span className="text-sm text-gray-600">
+                              {new Date(dateRange.since).toLocaleDateString()} -{" "}
+                              {new Date(dateRange.until).toLocaleDateString()}
+                            </span>
+                            <button
+                              onClick={removeFilter}
+                              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                            >
+                              Reset to Lifetime
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => setShowDateFilter(true)}
+                            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            Add Date Filter
+                          </button>
                         )}
                       </div>
                     </div>
+
+                    {/* Date Range Selector */}
+                    {showDateFilter && (
+                      <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex flex-wrap gap-4 items-end">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Start Date
+                            </label>
+                            <input
+                              type="date"
+                              value={dateRange.since}
+                              onChange={(e) =>
+                                setDateRange((prev) => ({
+                                  ...prev,
+                                  since: e.target.value,
+                                }))
+                              }
+                              className="border border-gray-300 rounded-md p-2"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              End Date
+                            </label>
+                            <input
+                              type="date"
+                              value={dateRange.until}
+                              onChange={(e) =>
+                                setDateRange((prev) => ({
+                                  ...prev,
+                                  until: e.target.value,
+                                }))
+                              }
+                              className="border border-gray-300 rounded-md p-2"
+                            />
+                          </div>
+                          <button
+                            onClick={() => fetchInsights(dateRange)}
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          >
+                            Apply Filter
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ))}
+                )}
+
+                {/* Metrics Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {insights.map((metric, index) => (
+                    <div
+                      key={metric.name || index}
+                      className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start space-x-4">
+                        {getMetricIcon(metric.name)}
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-600">
+                            {getMetricName(metric.name)}
+                          </p>
+                          <p className="mt-2 text-2xl font-semibold text-gray-900">
+                            {metric.values && metric.values[0]
+                              ? parseInt(
+                                  metric.values[0].value
+                                ).toLocaleString()
+                              : "0"}
+                          </p>
+                          {metric.values && metric.values[0]?.end_time && (
+                            <p className="mt-1 text-xs text-gray-500">
+                              Last updated:{" "}
+                              {new Date(
+                                metric.values[0].end_time
+                              ).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="bg-white rounded-lg shadow-sm p-6 text-center">
