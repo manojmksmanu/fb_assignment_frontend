@@ -211,9 +211,9 @@ const Page = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                       <div>
                         <h2>Page Insights</h2>
-                        {insightsData?.success ? (
+                        {insights?.success && insights.data.length > 0 ? (
                           <div>
-                            {insightsData.data.map((metric, index) => (
+                            {insights.data.map((metric, index) => (
                               <div key={index}>
                                 <h3>{metric.title}</h3>
                                 <p>{metric.description}</p>
