@@ -57,57 +57,67 @@ const Page = () => {
     }
   };
 
-  const fetchInsights = async (customDateRange = null) => {
-    if (!selectedPage) return;
+const fetchInsights = async (customDateRange = null) => {
+  if (!selectedPage) return;
 
-    const pageData = pages.find((item) => item.id === selectedPage);
-    if (!pageData || !pageData.access_token) {
-      console.error("No page data or access token found for selected page");
-      return;
-    }
+  const pageData = pages.find((item) => item.id === selectedPage);
+  if (!pageData || !pageData.access_token) {
+    console.error("No page data or access token found for selected page");
+    return;
+  }
 
-    console.log(pageData,'pageData')
+  setLoading(true);
+  setError(null);
 
-    setLoading(true);
-    setError(null);
+  try {
+    let params = {
+      page_id: selectedPage,
+      access_token: pageData.access_token,
+    };
 
-    try {
-      let params = {
-        page_id: selectedPage,
-        access_token: pageData.access_token,
-      };
+    console.log(params,'params')
 
-      if (customDateRange) {
-        params.since = Math.floor(
-          new Date(customDateRange.since).getTime() / 1000
-        );
-        params.until = Math.floor(
-          new Date(customDateRange.until).getTime() / 1000
-        );
-        setIsFiltered(true);
-      } else {
-        setIsFiltered(false);
-      }
-
-      const insightsRes = await axios.get(
-        "https://fb-assignment.onrender.com/page-insights",
-        { params }
+    if (customDateRange) {
+      const sinceTimestamp = Math.floor(
+        new Date(customDateRange.since).getTime() / 1000
+      );
+      const untilTimestamp = Math.floor(
+        new Date(customDateRange.until).getTime() / 1000
       );
 
-      if (insightsRes.data.error) {
-        setError(insightsRes.data.error);
-        return;
+      if (sinceTimestamp > untilTimestamp) {
+        throw new Error("Invalid date range: 'since' must be before 'until'");
       }
 
-      setInsights(insightsRes.data.data);
-      setShowDateFilter(true);
-    } catch (error) {
-      console.log(error.message)
-      setError(error.response?.data?.error || error.message);
-    } finally {
-      setLoading(false);
+      params.since = sinceTimestamp;
+      params.until = untilTimestamp;
+      setIsFiltered(true);
+    } else {
+      setIsFiltered(false);
     }
-  };
+
+    console.log("Fetching insights with params:", params);
+
+    const insightsRes = await axios.get(
+      "https://fb-assignment.onrender.com/page-insights",
+      { params }
+    );
+
+    if (insightsRes.data.error) {
+      setError(insightsRes.data.error);
+      return;
+    }
+console.log(insightsRes.data.data,'insightsResd data data')
+    setInsights(insightsRes.data.data);
+    setShowDateFilter(true);
+  } catch (error) {
+    console.log("API Error:", error.response?.data || error.message);
+    setError(error.response?.data?.error || error.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   console.log(pages, "pages");
 
