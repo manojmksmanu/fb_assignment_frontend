@@ -216,7 +216,10 @@ const Page = () => {
                   </div>
                 ) : (
                   <div className="mt-6 text-center text-gray-500">
-                    <p>No data available for the requested metrics.</p>
+                    {insights?.success && (
+                      <p>No data available for the requested metrics.</p>
+                    )}
+              
                   </div>
                 )}
               </div>
