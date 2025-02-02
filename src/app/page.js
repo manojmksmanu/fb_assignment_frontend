@@ -206,9 +206,12 @@ const Page = () => {
               {/* Insights section */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                 <div className="col-span-1 sm:col-span-2">
-                  <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                    Page Insights
-                  </h2>
+                  {selectedPage &
+                  (
+                    <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                      Page Insights
+                    </h2>
+                  )}
                   {insights?.success && insights.data.length > 0 ? (
                     <div className="space-y-6">
                       {insights.data.map((metric, index) => (
@@ -238,7 +241,9 @@ const Page = () => {
                       ))}
                     </div>
                   ) : (
-                    <p>No data available for the requested metrics.</p>
+                    selectedPage && (
+                      <p>No data available for the requested metrics.</p>
+                    )
                   )}
                 </div>
               </div>
